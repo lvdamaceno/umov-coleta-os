@@ -32,6 +32,28 @@ export async function token() {
   }
 }
 
+// Função para enviar as notas para o UMOV
+export async function postMontagens(nunota) {
+  const url = `${process.env.APIPASS_SEND_TO_UMOV}${nunota}`;
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+  try {
+    const response = await fetch(url, options);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Dados recebidos:', data);
+    } else {
+      console.error('Erro na requisição:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('Erro ao fazer a requisição:', error);
+  }
+}
+
 export function requestBody(date) {
   const requestBody = {
     serviceName: "DbExplorerSP.executeQuery",
