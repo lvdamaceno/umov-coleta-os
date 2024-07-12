@@ -5,7 +5,7 @@ dotenv.config();
 
 const url = process.env.SNK_ENDPOINT_QUERY
 const authentication = await token();
-const data_nota = '10/01/2023'
+const data_nota = '12/01/2023'
 
 const options = {
   method: 'POST',

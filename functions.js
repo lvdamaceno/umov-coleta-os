@@ -18,11 +18,11 @@ export async function token() {
   try {
     const response = await axios.post(url, {}, { headers });
     const token = response.data.bearerToken;
-    // console.log('Conexão com Sankhya: Autorizada');
+    console.log('Conexão com Sankhya: Autorizada');
     return token;
   } catch (error) {
     if (error.response) {
-      console.error('Erro na resposta do servidor:', error.response.data);
+      console.error('Conexão com Sankhya: Recusada:', error.response.data);
       console.error('Status do erro:', error.response.status);
     } else if (error.request) {
       console.error('Nenhuma resposta recebida:', error.request);
@@ -45,7 +45,7 @@ export async function postMontagens(nunota) {
     const response = await fetch(url, options);
     if (response.ok) {
       const data = await response.json();
-      console.log('Dados recebidos:', data);
+      console.log('Resposta Umov:', data);
     } else {
       console.error('Erro na requisição:', response.status, response.statusText);
     }
@@ -54,6 +54,7 @@ export async function postMontagens(nunota) {
   }
 }
 
+// Função que monta o body da requisição
 export function requestBody(date) {
   const requestBody = {
     serviceName: "DbExplorerSP.executeQuery",
