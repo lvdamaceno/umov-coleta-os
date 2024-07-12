@@ -1,4 +1,4 @@
-import { token } from '../getToken.js'; // ajuste o caminho conforme necessário
+import { token } from '../functions.js'; // ajuste o caminho conforme necessário
 import dotenv from 'dotenv';
 
 // Carregando variáveis de ambiente específicas para teste

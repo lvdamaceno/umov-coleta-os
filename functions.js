@@ -31,3 +31,13 @@ export async function token() {
     }
   }
 }
+
+export function requestBody(date) {
+  const requestBody = {
+    serviceName: "DbExplorerSP.executeQuery",
+    requestBody: {
+      sql: `SELECT sankhya.CC_UMOV_COLETA_OS('${date}') AS MontagensJSON`
+    }
+  };
+  return requestBody
+}
