@@ -1,24 +1,14 @@
 import fetch from 'node-fetch';
-import { token, requestBody, postMontagens } from './functions.js'
+import { token, options, postMontagens } from './functions.js'
 import dotenv from 'dotenv';
 dotenv.config();
 
 const url = process.env.SNK_ENDPOINT_QUERY
 const authentication = await token();
-const data_nota = '12/01/2023'
 
-const options = {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authentication}`
-  },
-  body: JSON.stringify(requestBody(data_nota))
-}
-
-async function fetchData() {
+async function sentOsToUmov(date) {
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(url, options(authentication, date));
     const data = await response.json();
     const { responseBody: { rows } } = data;
 
@@ -35,4 +25,4 @@ async function fetchData() {
   }
 }
 
-fetchData();
+sentOsToUmov('17/01/2023');

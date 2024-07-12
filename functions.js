@@ -55,7 +55,20 @@ export async function postMontagens(nunota) {
 }
 
 // Função que monta o body da requisição
-export function requestBody(date) {
+export function options(auth, date) {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${auth}`
+    },
+    body: JSON.stringify(requestBody(date))
+  }
+  return options
+}
+
+
+function requestBody(date) {
   const requestBody = {
     serviceName: "DbExplorerSP.executeQuery",
     requestBody: {
@@ -64,3 +77,4 @@ export function requestBody(date) {
   };
   return requestBody
 }
+
