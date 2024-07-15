@@ -78,6 +78,7 @@ function requestBody(date) {
   return requestBody
 }
 
+// Função para tratar a data enviada, se for nulo usa a data de ontem
 export function yesterday(inputDate) {
   if (!inputDate) {
     const today = new Date();
@@ -91,16 +92,4 @@ export function yesterday(inputDate) {
   } else {
     return inputDate
   }
-}
-
-// Função para tratar a data enviada, se for nulo usa a data de ontem
-export function getDate(inputDate) {
-  let date;
-  if (!inputDate) {
-    date = new Date();
-    date.setDate(date.getDate() - 1);
-  } else {
-    date = new Date(inputDate);
-  }
-  return date;
 }
