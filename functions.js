@@ -78,13 +78,29 @@ function requestBody(date) {
   return requestBody
 }
 
-export function yesterday() {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const day = String(yesterday.getDate()).padStart(2, '0');
-  const month = String(yesterday.getMonth() + 1).padStart(2, '0');
-  const year = yesterday.getFullYear();
-  const formattedDate = `${day}/${month}/${year}`;
-  return formattedDate
+export function yesterday(inputDate) {
+  if (!inputDate) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const day = String(yesterday.getDate()).padStart(2, '0');
+    const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const year = yesterday.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+    return formattedDate
+  } else {
+    return inputDate
+  }
+}
+
+// Função para tratar a data enviada, se for nulo usa a data de ontem
+export function getDate(inputDate) {
+  let date;
+  if (!inputDate) {
+    date = new Date();
+    date.setDate(date.getDate() - 1);
+  } else {
+    date = new Date(inputDate);
+  }
+  return date;
 }

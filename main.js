@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { token, options, postMontagens, yesterday } from './functions.js'
+import { token, options, postMontagens, getDate, yesterday } from './functions.js'
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,4 +25,6 @@ async function sentOsToUmov(date) {
   }
 }
 
+// sentOsToUmov(yesterday('13/07/2024'));
 sentOsToUmov(yesterday());
+
