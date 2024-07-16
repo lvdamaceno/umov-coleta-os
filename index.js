@@ -20,7 +20,7 @@ async function token() {
   try {
     const response = await axios.post(url, {}, { headers });
     const token = response.data.bearerToken;
-    console.log('Conexão com Sankhya: Autorizada');
+    console.log(`Conexão com Sankhya: Autorizada em ${today()}`);
     return token;
   } catch (error) {
     handleRequestError(error, 'Conexão com Sankhya');
@@ -40,7 +40,8 @@ async function postMontagens(nunota) {
     const response = await fetch(url, options);
     if (response.ok) {
       const data = await response.json();
-      console.log('Resposta Umov:', data);
+      // console.log('Resposta ApiPass:', data);
+      console.log(`Ordem de serviço ${nunota} enviada`)
     } else {
       console.error('Erro na requisição:', response.status, response.statusText);
     }
@@ -71,8 +72,20 @@ function requestBody(date) {
   };
 }
 
+// Funçao para retornar a data de hoje em dd/mm/aaaa
+function today() {
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Os meses começam do 0
+  const year = today.getFullYear();
+  const formattedDate = `${day}/${month}/${year}`;
+  return formattedDate
+
+}
+
 // Função para tratar a data enviada, se for nulo usa a data de ontem
 function yesterday(inputDate) {
+  console.log(`Enviado Ordens do dia ${inputDate}`)
   if (!inputDate) {
     const today = new Date();
     const yesterday = new Date(today);
@@ -121,4 +134,4 @@ async function sentOsToUmov(date) {
 }
 
 // Chamada da função com data específica
-sentOsToUmov(yesterday('23/01/2024'));
+sentOsToUmov(yesterday('01/02/2024'));
