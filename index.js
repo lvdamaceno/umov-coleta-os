@@ -1,6 +1,8 @@
 import axios from 'axios';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -20,7 +22,7 @@ async function token() {
   try {
     const response = await axios.post(url, {}, { headers });
     const token = response.data.bearerToken;
-    console.log(`Conexão com Sankhya: Autorizada em ${today()}`);
+    console.log(`Conexão com Sankhya autorizada`);
     return token;
   } catch (error) {
     handleRequestError(error, 'Conexão com Sankhya');
@@ -30,6 +32,7 @@ async function token() {
 // Função para enviar as notas para o UMOV
 async function postMontagens(nunota) {
   const url = `${process.env.APIPASS_SEND_TO_UMOV}${nunota}`;
+  const log = `Ordem de serviço ${nunota} enviada em ${today()}`
   const options = {
     method: 'GET',
     headers: {
@@ -41,7 +44,8 @@ async function postMontagens(nunota) {
     if (response.ok) {
       const data = await response.json();
       // console.log('Resposta ApiPass:', data);
-      console.log(`Ordem de serviço ${nunota} enviada`)
+      console.log(log)
+      logOsToCSV(log)
     } else {
       console.error('Erro na requisição:', response.status, response.statusText);
     }
@@ -84,8 +88,7 @@ function today() {
 }
 
 // Função para tratar a data enviada, se for nulo usa a data de ontem
-function yesterday(inputDate) {
-  console.log(`Enviado Ordens do dia ${inputDate}`)
+function formatDate(inputDate) {
   if (!inputDate) {
     const today = new Date();
     const yesterday = new Date(today);
@@ -93,8 +96,10 @@ function yesterday(inputDate) {
     const day = String(yesterday.getDate()).padStart(2, '0');
     const month = String(yesterday.getMonth() + 1).padStart(2, '0');
     const year = yesterday.getFullYear();
+    console.log(`Enviado Ordens do dia ${day}/${month}/${year}`)
     return `${day}/${month}/${year}`;
   }
+  console.log(`Enviado Ordens do dia ${inputDate}`)
   return inputDate;
 }
 
@@ -110,6 +115,32 @@ function handleRequestError(error, context) {
   }
 }
 
+// Funcao que cria o nome dos arquivos de log
+function getMonthYear(date = new Date()) {
+  date = new Date()
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês começa do 0
+  const year = date.getFullYear();
+  return `${year}${month}`;
+}
+
+function logDateToCSV(date) {
+  const logFilePath = path.join(process.cwd(), `logs/datas/datas${getMonthYear(formatDate)}.csv`);
+  const fileExists = fs.existsSync(logFilePath);
+  if (!fileExists) {
+    fs.writeFileSync(logFilePath, 'Registro de envio de Ordens de Serviço\n');
+  }
+  fs.appendFileSync(logFilePath, `OS's do dia ${date} enviadas em ${today()}\n`);
+}
+
+function logOsToCSV(text) {
+  const logFilePath = path.join(process.cwd(), `logs/notas/notas${getMonthYear(formatDate)}.csv`);
+  const fileExists = fs.existsSync(logFilePath);
+  if (!fileExists) {
+    fs.writeFileSync(logFilePath, 'Registro das Ordens de Serviço enviadas\n');
+  }
+  fs.appendFileSync(logFilePath, `${text}\n`);
+}
+
 // URL para endpoint de query
 const endpoint_query = process.env.SNK_ENDPOINT_QUERY;
 
@@ -117,6 +148,7 @@ const endpoint_query = process.env.SNK_ENDPOINT_QUERY;
 const authentication = await token();
 
 async function sentOsToUmov(date) {
+  logDateToCSV(date)
   try {
     const response = await fetch(endpoint_query, options(authentication, date));
     const data = await response.json();
@@ -133,5 +165,6 @@ async function sentOsToUmov(date) {
   }
 }
 
-// Chamada da função com data específica
-sentOsToUmov(yesterday('01/02/2024'));
+// Chamada da função principal
+// no parametro uma função se ficar vazia assume a data do dia anterior, se não a data que for informada no formato dd/mm/aaaa
+sentOsToUmov(formatDate('14/02/2024'));
