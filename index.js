@@ -1,4 +1,3 @@
-import axios from 'axios';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -78,6 +77,16 @@ function logDateToCSV(date) {
   fs.appendFileSync(logFilePath, `OS's do dia ${date} enviadas em ${today()}\n`);
 }
 
+// Função para registrar datas em CSV
+function logErroDateToCSV(date) {
+  const logFilePath = path.join(process.cwd(), `logs/datas/datas${getMonthYear()}.csv`);
+  const fileExists = fs.existsSync(logFilePath);
+  if (!fileExists) {
+    fs.writeFileSync(logFilePath, 'Registro de envio de Ordens de Serviço\n');
+  }
+  fs.appendFileSync(logFilePath, `Sem OS's no dia ${date} regitro em ${today()}\n`);
+}
+
 // Função para registrar ordens de serviço em CSV
 function logOsToCSV(text) {
   const logFilePath = path.join(process.cwd(), `logs/notas/notas${getMonthYear()}.csv`);
@@ -95,8 +104,12 @@ function logOsToCSV(text) {
 // Função para realizar o login e obter o token
 async function token() {
   try {
-    const response = await axios.post(url, {}, { headers });
-    const token = response.data.bearerToken;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers
+    });
+    const data = await response.json();
+    const token = data.bearerToken;
     console.log('Conexão com Sankhya autorizada');
     return token;
   } catch (error) {
@@ -156,12 +169,12 @@ function requestBody(date) {
 
 // Função principal para autenticação e envio de OS para UMOV
 async function sentOsToUmov(date) {
-  logDateToCSV(date);
   try {
     const authToken = await token();
     const response = await fetch(endpoint_query, options(authToken, date));
     const data = await response.json();
     const { responseBody: { rows } } = data;
+    logDateToCSV(date);
 
     for (const row of rows) {
       const baseArray = row[0].split(',');
@@ -170,7 +183,9 @@ async function sentOsToUmov(date) {
       }
     }
   } catch (error) {
-    console.error('Erro na requisição:', error);
+    logErroDateToCSV(date)
+    console.log(`Sem montagens para o dia ${date}`)
+    console.error('Erro na requisição\n', error);
   }
 }
 
