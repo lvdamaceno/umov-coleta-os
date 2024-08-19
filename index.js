@@ -174,13 +174,12 @@ async function sentOsToUmov(date) {
     const response = await fetch(endpoint_query, options(authToken, date));
     const data = await response.json();
     const { responseBody: { rows } } = data;
-    logDateToCSV(date);
-
     for (const row of rows) {
       const baseArray = row[0].split(',');
       for (const element of baseArray) {
         await postMontagens(element);
       }
+      logDateToCSV(date);
     }
   } catch (error) {
     logErroDateToCSV(date)
@@ -193,5 +192,5 @@ async function sentOsToUmov(date) {
 // CHAMADA DA FUNÇÃO PRINCIPAL
 // ============================================
 
-// No parâmetro, uma função se ficar vazia assume a data do dia anterior, se não a data que for informada no formato dd/mm/aaaa
+// No parâmetro, uma função se ficar vazia assume a data do dia anterior, se não a data que for informada no formato  dd/mm/aaaa
 sentOsToUmov(formatDate());
