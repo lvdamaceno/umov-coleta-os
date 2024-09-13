@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { processarArquivoComData } from './ultimadata.js'; // Importa a função que retorna a última data
 
 dotenv.config();
 
@@ -41,23 +42,11 @@ function formatDate(inputDate) {
     const day = String(yesterday.getDate()).padStart(2, '0');
     const month = String(yesterday.getMonth() + 1).padStart(2, '0');
     const year = yesterday.getFullYear();
-    console.log(`Enviado Ordens do dia ${day}/${month}/${year}`);
+    // console.log(`Enviando Ordens do dia ${day}/${month}/${year}`);
     return `${day}/${month}/${year}`;
   }
-  console.log(`Enviado Ordens do dia ${inputDate}`);
+  // console.log(`Enviando Ordens do dia ${inputDate}`);
   return inputDate;
-}
-
-// Função para tratar erros de requisição
-function handleRequestError(error, context) {
-  if (error.response) {
-    console.error(`${context}: Recusada:`, error.response.data);
-    console.error('Status do erro:', error.response.status);
-  } else if (error.request) {
-    console.error('Nenhuma resposta recebida:', error.request);
-  } else {
-    console.error('Erro ao configurar a requisição:', error.message);
-  }
 }
 
 // Função para criar o nome dos arquivos de log
@@ -113,7 +102,7 @@ async function token() {
     console.log('Conexão com Sankhya autorizada');
     return token;
   } catch (error) {
-    handleRequestError(error, 'Conexão com Sankhya');
+    console.error('Erro ao conectar com Sankhya:', error.message);
   }
 }
 
@@ -182,15 +171,53 @@ async function sentOsToUmov(date) {
       logDateToCSV(date);
     }
   } catch (error) {
-    logErroDateToCSV(date)
-    console.log(`Sem montagens para o dia ${date}`)
+    logErroDateToCSV(date);
+    console.log(`Sem montagens para o dia ${date}`);
     console.error('Erro na requisição\n', error);
   }
 }
 
 // ============================================
+// PROCESSAMENTO DE DATAS
+// ============================================
+
+async function processarEnvioComBaseNaUltimaData() {
+  const ultimaData = await processarArquivoComData(path.join(process.cwd(), 'logs/datas')); // Pega a última data
+  const ontem = formatDate(); // Formata a data de ontem
+
+  // Verifica se a última data é a mesma que ontem
+  if (ultimaData === ontem) {
+    console.log('A última data registrada já é de ontem, nada a enviar.');
+    return;
+  }
+
+  // Converte a última data para o formato Date
+  const [dia, mes, ano] = ultimaData.split('/').map(Number);
+  const dataAtual = new Date(ano, mes - 1, dia); // Meses são baseados em zero
+
+  const hoje = new Date();
+
+  // Começa no dia seguinte à última data
+  dataAtual.setDate(dataAtual.getDate() + 1);
+
+  while (dataAtual < hoje) {
+    const diaFormatado = String(dataAtual.getDate()).padStart(2, '0');
+    const mesFormatado = String(dataAtual.getMonth() + 1).padStart(2, '0');
+    const anoFormatado = dataAtual.getFullYear();
+    const dataFormatada = `${diaFormatado}/${mesFormatado}/${anoFormatado}`;
+    console.log(dataFormatada);
+
+    // Envia as ordens do dia
+    await sentOsToUmov(dataFormatada);
+
+    // Avança para o próximo dia
+    dataAtual.setDate(dataAtual.getDate() + 1);
+  }
+}
+
+
+// ============================================
 // CHAMADA DA FUNÇÃO PRINCIPAL
 // ============================================
 
-// No parâmetro, uma função se ficar vazia assume a data do dia anterior, se não a data que for informada no formato  dd/mm/aaaa
-sentOsToUmov(formatDate());
+processarEnvioComBaseNaUltimaData();

@@ -50,7 +50,7 @@ function obterPrimeiraData(texto) {
 }
 
 // Função principal que processa o arquivo e retorna a primeira data da última linha
-async function processarArquivoComData(pasta) {
+export async function processarArquivoComData(pasta) {
   const ultimaLinha = await listarArquivoPorAnoMes(pasta);
 
   if (ultimaLinha) {
@@ -65,5 +65,5 @@ const directoryPath = path.join(process.cwd(), 'logs/datas');
 
 // Exemplo de uso
 processarArquivoComData(directoryPath).then(data => {
-  console.log(data); // Aqui você pode tratar o valor da data como desejar
+  // console.log(data); // Aqui você pode tratar o valor da data como desejar
 });
